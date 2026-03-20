@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Play, Pause, ChevronDown, ChevronUp, Music, Speaker, Mic2, Info, BarChart3, Layers, Database } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'motion';
 
 // --- Types ---
 
