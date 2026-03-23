@@ -35,7 +35,7 @@ interface AblationSample {
 const MAIN_DEMOS: MainDemoSample[] = [
   {
     id: 'm1',
-    prompt: "A relaxing and ambient instrumental background track with soft piano and strings.",
+    prompt: "A relaxing and ambient instrumental background track with soft piano.",
     rows: [
       { modelName: 'AudioLDM', base: '/audio/000087_AudioLDM1_TextOnly.wav', vanillaRAG: '#', aura: '#', target: '#' },
       { modelName: 'AudioLDM2', base: '#', vanillaRAG: '#', aura: '#', target: '#' },
