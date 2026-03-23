@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Play, Pause, ChevronDown, ChevronUp, Music, Speaker, Mic2, Info, BarChart3, Layers, Database } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion';
+import { Play, Pause, ChevronDown, ChevronUp, Music, Speaker, Mic2, Info, BarChart3, Layers, Database, Github } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // --- Types ---
 
@@ -420,6 +420,24 @@ export default function App() {
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight leading-[1.1]">
             AURA: Personalized Audio Generation via <span className="text-indigo-600">Aesthetic-intent</span> Retrieval and Alignment
           </h1>
+          
+          <div className="mb-8 inline-block">
+            <a 
+              href="https://github.com/Anonymous-Researcher19/AURA" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 px-5 py-2.5 bg-indigo-50 text-indigo-700 rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all duration-300 shadow-sm"
+            >
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-indigo-200 shadow-lg group-hover:scale-110 transition-transform">
+                <Github size={18} />
+              </div>
+              <div className="text-left">
+                <p className="text-[10px] uppercase tracking-widest font-black opacity-60 leading-none mb-1">Open Source</p>
+                <p className="text-sm font-bold">View Code on GitHub</p>
+              </div>
+            </a>
+          </div>
+
           <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
             A novel framework that moves beyond traditional content replication by constructing multi-scale aesthetic profiles to capture users' personalized "aesthetic genes."
           </p>
