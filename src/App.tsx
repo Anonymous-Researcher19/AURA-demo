@@ -288,6 +288,9 @@ const ABLATION_DEMOS: AblationSample[] = [
 
 const CompactAudioPlayer = ({ url, label }: { url: string; label: string }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const togglePlay = () => {
@@ -298,18 +301,84 @@ const CompactAudioPlayer = ({ url, label }: { url: string; label: string }) => {
     }
   };
 
+  const onTimeUpdate = () => {
+    if (audioRef.current) {
+      const current = audioRef.current.currentTime;
+      const dur = audioRef.current.duration;
+      if (dur) {
+        setProgress((current / dur) * 100);
+        setCurrentTime(current);
+        setDuration(dur);
+      }
+    }
+  };
+
+  const onLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (audioRef.current) {
+      const seekTime = (parseFloat(e.target.value) / 100) * duration;
+      audioRef.current.currentTime = seekTime;
+      setProgress(parseFloat(e.target.value));
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const mins = Math.floor(time / 60);
+    const secs = Math.floor(time % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
-    <div className="flex flex-col items-center gap-1 p-2 bg-slate-50 rounded-lg border border-slate-200 hover:bg-indigo-50 transition-colors group">
-      <button
-        onClick={togglePlay}
-        className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${
-          isPlaying ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-300 group-hover:border-indigo-300'
-        }`}
-      >
-        {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} className="ml-0.5" fill="currentColor" />}
-      </button>
-      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{label}</span>
-      <audio ref={audioRef} src={url} onEnded={() => setIsPlaying(false)} className="hidden" />
+    <div className="flex flex-col gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200 hover:bg-indigo-50/50 transition-all group w-full max-w-[160px] mx-auto">
+      <div className="flex items-center gap-2">
+        <button
+          onClick={togglePlay}
+          className={`w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-full transition-all shadow-sm ${
+            isPlaying ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 group-hover:border-indigo-300'
+          }`}
+        >
+          {isPlaying ? <Pause size={12} fill="currentColor" /> : <Play size={12} className="ml-0.5" fill="currentColor" />}
+        </button>
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter truncate">{label}</span>
+          <span className="text-[9px] font-mono text-slate-500 leading-none">
+            {formatTime(currentTime)} / {formatTime(duration || 0)}
+          </span>
+        </div>
+      </div>
+      
+      <div className="relative w-full h-1 bg-slate-200 rounded-full overflow-hidden group/progress">
+        <div 
+          className="absolute top-0 left-0 h-full bg-indigo-500 transition-all duration-100" 
+          style={{ width: `${progress}%` }}
+        />
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={progress}
+          onChange={handleSeek}
+          className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-10"
+        />
+      </div>
+      
+      <audio 
+        ref={audioRef} 
+        src={url} 
+        onTimeUpdate={onTimeUpdate}
+        onLoadedMetadata={onLoadedMetadata}
+        onEnded={() => {
+          setIsPlaying(false);
+          setProgress(0);
+          setCurrentTime(0);
+        }} 
+        className="hidden" 
+      />
     </div>
   );
 };
@@ -486,12 +555,28 @@ export default function App() {
           ))}
         </div>
 
-        <div className="bg-slate-900 rounded-3xl p-8 text-center border border-slate-800 shadow-2xl">
-          <div className="inline-block px-4 py-1 bg-indigo-500/20 text-indigo-400 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6 border border-indigo-500/30">
+        <div className="bg-white rounded-3xl p-4 md:p-8 text-center border border-slate-200 shadow-xl overflow-hidden">
+          <div className="inline-block px-4 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6 border border-indigo-100">
             System Architecture
           </div>
-          <div className="aspect-[21/9] bg-slate-800/50 rounded-2xl flex items-center justify-center border border-slate-700/50 border-dashed">
-            <p className="text-slate-500 font-mono text-xs uppercase tracking-[0.3em]">[ Architecture Diagram Placeholder ]</p>
+          <div className="relative group">
+            <img 
+              src="/overview.png" 
+              alt="AURA System Architecture" 
+              className="w-full h-auto rounded-xl shadow-sm border border-slate-100"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "https://picsum.photos/seed/architecture/1200/500?blur=2";
+                target.title = "Please replace /public/overview.png with your diagram";
+              }}
+            />
+            <div className="mt-4 flex justify-center gap-8 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <span className="flex items-center gap-1"><div className="w-2 h-2 bg-indigo-500 rounded-full" /> Stage 1: MAP</span>
+              <span className="flex items-center gap-1"><div className="w-emerald-500 w-2 h-2 rounded-full" /> Stage 2: HAR</span>
+              <span className="flex items-center gap-1"><div className="w-amber-500 w-2 h-2 rounded-full" /> Stage 3: IAD</span>
+              <span className="flex items-center gap-1"><div className="w-rose-500 w-2 h-2 rounded-full" /> Stage 4: ASA</span>
+            </div>
           </div>
         </div>
       </section>
@@ -543,30 +628,37 @@ export default function App() {
       </section>
 
       {/* Spectrogram Analysis */}
-      <section className="py-16 px-6 bg-slate-50">
+      <section className="py-16 px-6 bg-slate-50 border-y border-slate-200">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-black mb-4 uppercase tracking-tight">Spectrogram Visualization</h2>
             <p className="text-slate-500">Mel-spectrogram analysis of personalized audio generation (Figure 6 from Paper).</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { label: 'Ground Truth', desc: 'Target aesthetic texture from user history, showing rich harmonic structure.' },
-              { label: 'Baseline', desc: 'Suffers from rhythmic blurring and significant harmonic loss in high frequencies.' },
-              { label: 'AURA (Ours)', desc: 'Successfully reconstructs sharp vertical transients and preserves aesthetic texture.' }
-            ].map((item, i) => (
-              <div key={i} className="space-y-4">
-                <div className="aspect-[4/3] bg-slate-900 rounded-2xl flex items-center justify-center border border-slate-800 shadow-xl overflow-hidden relative group">
-                  <div className="absolute inset-0 bg-indigo-500/10 group-hover:bg-indigo-500/20 transition-colors" />
-                  <p className="text-slate-600 font-mono text-[10px] uppercase tracking-widest">[ Spectrogram {i + 1} ]</p>
+          <div className="bg-white p-4 md:p-8 rounded-3xl border border-slate-200 shadow-sm">
+            <img 
+              src="/spectrogram.png" 
+              alt="Spectrogram Comparison" 
+              className="w-full h-auto rounded-xl"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "https://picsum.photos/seed/spectrogram/1200/300?blur=2";
+                target.title = "Please replace /public/spectrogram.png with your comparison image";
+              }}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+              {[
+                { label: 'Ground Truth', desc: 'Target aesthetic texture from user history, showing rich harmonic structure.' },
+                { label: 'Baseline', desc: 'Suffers from rhythmic blurring and significant harmonic loss in high frequencies.' },
+                { label: 'AURA (Ours)', desc: 'Successfully reconstructs sharp vertical transients and preserves aesthetic texture.' }
+              ].map((item, i) => (
+                <div key={i} className="text-center">
+                  <h4 className="font-bold text-slate-900 uppercase tracking-tighter text-sm mb-1">{item.label}</h4>
+                  <p className="text-slate-500 text-[11px] leading-relaxed px-4">{item.desc}</p>
                 </div>
-                <div className="text-center">
-                  <h4 className="font-bold text-slate-900">{item.label}</h4>
-                  <p className="text-slate-500 text-xs">{item.desc}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
